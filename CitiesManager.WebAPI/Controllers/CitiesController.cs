@@ -10,12 +10,11 @@ using CitiesManager.WebAPI.Models;
 
 namespace CitiesManager.WebAPI.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    [Route("api/[controller]")] //If commented, throws exception as every web api controller should have route
+    [ApiController] //If this attribute is commented, then wherever we want to read JsonData from Req.Body we need to write [FromBody] explicitly before. If any model state errors appears, then it automatically redirects to bad request page
     public class CitiesController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
-
         public CitiesController(ApplicationDbContext db)
         {
             _db = db;
@@ -29,22 +28,23 @@ namespace CitiesManager.WebAPI.Controllers
           {
               return NotFound();
           }
-            return await _db.Cities.ToListAsync();
+            return await _db.Cities.OrderByDescending(temp => temp.CityName).ToListAsync();
         }
 
         // GET: api/Cities/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<City>> GetCity(Guid id)
+        [HttpGet("{id}")] //HttpGet along with the Route Parameter
+        public async Task<ActionResult<City>> GetCity(Guid cityID)
         {
           if (_db.Cities == null)
           {
               return NotFound();
           }
-            var city = await _db.Cities.FindAsync(id);
+            //var city = await _db.Cities.FindAsync(cityID);
+            var city = await _db.Cities.FirstOrDefaultAsync(temp => temp.CityID == cityID);
 
             if (city == null)
             {
-                return NotFound();
+                return NotFound(); //Response.StatusCode = 404
             }
 
             return city;
@@ -53,9 +53,9 @@ namespace CitiesManager.WebAPI.Controllers
         // PUT: api/Cities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCity(Guid id, City city)
+        public async Task<IActionResult> PutCity(Guid cityID, City city)
         {
-            if (id != city.CityID)
+            if (cityID != city.CityID)
             {
                 return BadRequest();
             }
@@ -68,7 +68,7 @@ namespace CitiesManager.WebAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CityExists(id))
+                if (!CityExists(cityID))
                 {
                     return NotFound();
                 }
@@ -98,13 +98,13 @@ namespace CitiesManager.WebAPI.Controllers
 
         // DELETE: api/Cities/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCity(Guid id)
+        public async Task<IActionResult> DeleteCity(Guid cityID)
         {
             if (_db.Cities == null)
             {
                 return NotFound();
             }
-            var city = await _db.Cities.FindAsync(id);
+            var city = await _db.Cities.FindAsync(cityID);
             if (city == null)
             {
                 return NotFound();
@@ -116,9 +116,9 @@ namespace CitiesManager.WebAPI.Controllers
             return NoContent();
         }
 
-        private bool CityExists(Guid id)
+        private bool CityExists(Guid cityID)
         {
-            return (_db.Cities?.Any(e => e.CityID == id)).GetValueOrDefault();
+            return (_db.Cities?.Any(e => e.CityID == cityID)).GetValueOrDefault();
         }
     }
 }
