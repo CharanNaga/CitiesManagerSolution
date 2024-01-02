@@ -32,7 +32,7 @@ namespace CitiesManager.WebAPI.Controllers
         }
 
         // GET: api/Cities/5
-        [HttpGet("{id}")] //HttpGet along with the Route Parameter
+        [HttpGet("{cityID}")] //HttpGet along with the Route Parameter
         public async Task<ActionResult<City>> GetCity(Guid cityID)
         {
           if (_db.Cities == null)
@@ -52,21 +52,28 @@ namespace CitiesManager.WebAPI.Controllers
 
         // PUT: api/Cities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCity(Guid cityID, City city)
+        [HttpPut("{cityID}")]
+        public async Task<IActionResult> PutCity(Guid cityID, [Bind(nameof(City.CityID),nameof(City.CityName))] City city) //To avoid OverPosting of properties, better to use [Bind] for required Properties we want to include in Model Binding
         {
             if (cityID != city.CityID)
             {
                 return BadRequest();
             }
 
-            _db.Entry(city).State = EntityState.Modified;
+            //_db.Entry(city).State = EntityState.Modified;
+            var existingCity = await _db.Cities.FindAsync(cityID);
+            if(existingCity == null)
+            {
+                return NotFound();
+            }
+
+            existingCity.CityName = city.CityName;
 
             try
             {
                 await _db.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException) //this exception occurs, if the same obj is already updated by another
             {
                 if (!CityExists(cityID))
                 {
@@ -84,20 +91,20 @@ namespace CitiesManager.WebAPI.Controllers
         // POST: api/Cities
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<City>> PostCity(City city)
+        public async Task<ActionResult<City>> PostCity([Bind(nameof(City.CityID),nameof(City.CityName))] City city)
         {
           if (_db.Cities == null)
           {
               return Problem("Entity set 'ApplicationDbContext.Cities'  is null.");
           }
-            _db.Cities.Add(city);
-            await _db.SaveChangesAsync();
+          _db.Cities.Add(city);
+          await _db.SaveChangesAsync();
 
-            return CreatedAtAction("GetCity", new { id = city.CityID }, city);
+          return CreatedAtAction("GetCity", new { cityID = city.CityID }, city); //it returns 201 status code and add a response header 'location' with the url api/cities/newlygeneratedid & gives response. third parameter city object represents response.
         }
 
         // DELETE: api/Cities/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{cityID}")]
         public async Task<IActionResult> DeleteCity(Guid cityID)
         {
             if (_db.Cities == null)
