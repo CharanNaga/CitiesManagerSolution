@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CitiesManager.WebAPI.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class WeatherForecastController : ControllerBase
+    //[ApiController]
+    //[Route("api/[controller]")]
+    public class WeatherForecastController : CustomControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
