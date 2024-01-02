@@ -48,7 +48,8 @@ namespace CitiesManager.WebAPI.Controllers
                 //return NotFound(); //Response.StatusCode = 404
             }
 
-            return city;
+            return city; //If we want to return ObjectResult type(consists of model object which further can be converted to JSON Object), better go for ActionResult<T> type
+            //return Ok(city); //uncomment this statement, if return type of ActionMethod is IActionResult
         }
 
         // PUT: api/Cities/5
