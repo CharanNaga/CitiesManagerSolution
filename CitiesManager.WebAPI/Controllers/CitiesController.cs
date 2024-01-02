@@ -44,7 +44,8 @@ namespace CitiesManager.WebAPI.Controllers
 
             if (city == null)
             {
-                return NotFound(); //Response.StatusCode = 404
+                return Problem(detail: "Invalid CityID", statusCode: 400, title: "City Search");
+                //return NotFound(); //Response.StatusCode = 404
             }
 
             return city;
@@ -93,6 +94,10 @@ namespace CitiesManager.WebAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<City>> PostCity([Bind(nameof(City.CityID),nameof(City.CityName))] City city)
         {
+            //if(!ModelState.IsValid) //[ApiController] automatic does this same
+            //{
+            //    return ValidationProblem(ModelState);
+            //}
           if (_db.Cities == null)
           {
               return Problem("Entity set 'ApplicationDbContext.Cities'  is null.");
