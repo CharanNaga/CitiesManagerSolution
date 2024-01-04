@@ -21,6 +21,10 @@ namespace CitiesManager.WebAPI.Controllers
         }
 
         // GET: api/Cities
+        /// <summary>
+        /// Returns List of Cities retrieved from 'Cities' Table
+        /// </summary>
+        /// <returns>List of Cities</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<City>>> GetCities()
         {
