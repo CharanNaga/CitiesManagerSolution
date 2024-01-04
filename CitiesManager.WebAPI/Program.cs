@@ -1,10 +1,17 @@
 using CitiesManager.WebAPI.DatabaseContext;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers(
+    options =>
+    {
+        options.Filters.Add(new ProducesAttribute("application/json")); //making default content type for all action methods to 'application/json' so that in swagger.json we can see only application/json content RESPONSE
+        options.Filters.Add(new ConsumesAttribute("application/json")); //making default REQUEST type to application/json
+    })
+    .AddXmlSerializerFormatters(); //for enabling xml formatter which isn't supported by .net core by default
 
 //Adding DbContext as a service to the IoC container
 builder.Services.AddDbContext<ApplicationDbContext>(
