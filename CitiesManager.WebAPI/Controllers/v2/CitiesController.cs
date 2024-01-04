@@ -22,121 +22,21 @@ namespace CitiesManager.WebAPI.Controllers.v2
 
         // GET: api/Cities
         /// <summary>
-        /// Returns List of Cities retrieved from 'Cities' Table
+        /// Returns List of City Names retrieved from 'Cities' Table
         /// </summary>
-        /// <returns>List of Cities</returns>
+        /// <returns>List of City Names</returns>
         [HttpGet]
         //[Produces("application/xml")]
-        public async Task<ActionResult<IEnumerable<City>>> GetCities()
+        public async Task<ActionResult<IEnumerable<string?>>> GetCities() //Modifying requirement such that in v2, we need only GetCities() and that should return only CityNames
         {
             if (_db.Cities == null)
             {
                 return NotFound();
             }
-            return await _db.Cities.OrderByDescending(temp => temp.CityName).ToListAsync();
-        }
-
-        // GET: api/Cities/5
-        [HttpGet("{cityID}")] //HttpGet along with the Route Parameter
-        public async Task<ActionResult<City>> GetCity(Guid cityID)
-        {
-            if (_db.Cities == null)
-            {
-                return NotFound();
-            }
-            //var city = await _db.Cities.FindAsync(cityID);
-            var city = await _db.Cities.FirstOrDefaultAsync(temp => temp.CityID == cityID);
-
-            if (city == null)
-            {
-                return Problem(detail: "Invalid CityID", statusCode: 400, title: "City Search");
-                //return NotFound(); //Response.StatusCode = 404
-            }
-
-            return city; //If we want to return ObjectResult type(consists of model object which further can be converted to JSON Object), better go for ActionResult<T> type
-            //return Ok(city); //uncomment this statement, if return type of ActionMethod is IActionResult
-        }
-
-        // PUT: api/Cities/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{cityID}")]
-        public async Task<IActionResult> PutCity(Guid cityID, [Bind(nameof(City.CityID), nameof(City.CityName))] City city) //To avoid OverPosting of properties, better to use [Bind] for required Properties we want to include in Model Binding
-        {
-            if (cityID != city.CityID)
-            {
-                return BadRequest();
-            }
-
-            //_db.Entry(city).State = EntityState.Modified;
-            var existingCity = await _db.Cities.FindAsync(cityID);
-            if (existingCity == null)
-            {
-                return NotFound();
-            }
-
-            existingCity.CityName = city.CityName;
-
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException) //this exception occurs, if the same obj is already updated by another
-            {
-                if (!CityExists(cityID))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Cities
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<City>> PostCity([Bind(nameof(City.CityID), nameof(City.CityName))] City city)
-        {
-            //if(!ModelState.IsValid) //[ApiController] automatic does this same
-            //{
-            //    return ValidationProblem(ModelState);
-            //}
-            if (_db.Cities == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Cities'  is null.");
-            }
-            _db.Cities.Add(city);
-            await _db.SaveChangesAsync();
-
-            return CreatedAtAction("GetCity", new { cityID = city.CityID }, city); //it returns 201 status code and add a response header 'location' with the url api/cities/newlygeneratedid & gives response. third parameter city object represents response.
-        }
-
-        // DELETE: api/Cities/5
-        [HttpDelete("{cityID}")]
-        public async Task<IActionResult> DeleteCity(Guid cityID)
-        {
-            if (_db.Cities == null)
-            {
-                return NotFound();
-            }
-            var city = await _db.Cities.FindAsync(cityID);
-            if (city == null)
-            {
-                return NotFound();
-            }
-
-            _db.Cities.Remove(city);
-            await _db.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool CityExists(Guid cityID)
-        {
-            return (_db.Cities?.Any(e => e.CityID == cityID)).GetValueOrDefault();
+            return await _db.Cities.
+                OrderBy(c=>c.CityName)
+                .Select(c=>c.CityName)
+                .ToListAsync();
         }
     }
 }
