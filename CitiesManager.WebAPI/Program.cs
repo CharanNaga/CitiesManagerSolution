@@ -1,5 +1,6 @@
 using CitiesManager.WebAPI.DatabaseContext;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,13 @@ builder.Services.AddControllers(
         options.Filters.Add(new ConsumesAttribute("application/json")); //making default REQUEST type to application/json
     })
     .AddXmlSerializerFormatters(); //for enabling xml formatter which isn't supported by .net core by default
+
+//adding api versioning to identify same end points from different versions
+builder.Services.AddApiVersioning(
+    config =>
+    {
+        config.ApiVersionReader = new UrlSegmentApiVersionReader(); //to identify current working version of api as per request url (mentioned in CustomController)
+    });
 
 //Adding DbContext as a service to the IoC container
 builder.Services.AddDbContext<ApplicationDbContext>(
