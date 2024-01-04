@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using CitiesManager.WebAPI.DatabaseContext;
 using CitiesManager.WebAPI.Models;
 
-namespace CitiesManager.WebAPI.Controllers
+namespace CitiesManager.WebAPI.Controllers.v1
 {
     //[Route("api/[controller]")] //If commented, throws exception as every web api controller should have route
     //[ApiController] //If this attribute is commented, then wherever we want to read JsonData from Req.Body we need to write [FromBody] explicitly before. If any model state errors appears, then it automatically redirects to bad request page
@@ -26,13 +26,13 @@ namespace CitiesManager.WebAPI.Controllers
         /// </summary>
         /// <returns>List of Cities</returns>
         [HttpGet]
-        [Produces("application/xml")]
+        //[Produces("application/xml")]
         public async Task<ActionResult<IEnumerable<City>>> GetCities()
         {
-          if (_db.Cities == null)
-          {
-              return NotFound();
-          }
+            if (_db.Cities == null)
+            {
+                return NotFound();
+            }
             return await _db.Cities.OrderByDescending(temp => temp.CityName).ToListAsync();
         }
 
@@ -40,10 +40,10 @@ namespace CitiesManager.WebAPI.Controllers
         [HttpGet("{cityID}")] //HttpGet along with the Route Parameter
         public async Task<ActionResult<City>> GetCity(Guid cityID)
         {
-          if (_db.Cities == null)
-          {
-              return NotFound();
-          }
+            if (_db.Cities == null)
+            {
+                return NotFound();
+            }
             //var city = await _db.Cities.FindAsync(cityID);
             var city = await _db.Cities.FirstOrDefaultAsync(temp => temp.CityID == cityID);
 
@@ -60,7 +60,7 @@ namespace CitiesManager.WebAPI.Controllers
         // PUT: api/Cities/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{cityID}")]
-        public async Task<IActionResult> PutCity(Guid cityID, [Bind(nameof(City.CityID),nameof(City.CityName))] City city) //To avoid OverPosting of properties, better to use [Bind] for required Properties we want to include in Model Binding
+        public async Task<IActionResult> PutCity(Guid cityID, [Bind(nameof(City.CityID), nameof(City.CityName))] City city) //To avoid OverPosting of properties, better to use [Bind] for required Properties we want to include in Model Binding
         {
             if (cityID != city.CityID)
             {
@@ -69,7 +69,7 @@ namespace CitiesManager.WebAPI.Controllers
 
             //_db.Entry(city).State = EntityState.Modified;
             var existingCity = await _db.Cities.FindAsync(cityID);
-            if(existingCity == null)
+            if (existingCity == null)
             {
                 return NotFound();
             }
@@ -98,20 +98,20 @@ namespace CitiesManager.WebAPI.Controllers
         // POST: api/Cities
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<City>> PostCity([Bind(nameof(City.CityID),nameof(City.CityName))] City city)
+        public async Task<ActionResult<City>> PostCity([Bind(nameof(City.CityID), nameof(City.CityName))] City city)
         {
             //if(!ModelState.IsValid) //[ApiController] automatic does this same
             //{
             //    return ValidationProblem(ModelState);
             //}
-          if (_db.Cities == null)
-          {
-              return Problem("Entity set 'ApplicationDbContext.Cities'  is null.");
-          }
-          _db.Cities.Add(city);
-          await _db.SaveChangesAsync();
+            if (_db.Cities == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Cities'  is null.");
+            }
+            _db.Cities.Add(city);
+            await _db.SaveChangesAsync();
 
-          return CreatedAtAction("GetCity", new { cityID = city.CityID }, city); //it returns 201 status code and add a response header 'location' with the url api/cities/newlygeneratedid & gives response. third parameter city object represents response.
+            return CreatedAtAction("GetCity", new { cityID = city.CityID }, city); //it returns 201 status code and add a response header 'location' with the url api/cities/newlygeneratedid & gives response. third parameter city object represents response.
         }
 
         // DELETE: api/Cities/5
