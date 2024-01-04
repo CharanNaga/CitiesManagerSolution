@@ -12,6 +12,7 @@ namespace CitiesManager.WebAPI.Controllers.v2
 {
     //[Route("api/[controller]")] //If commented, throws exception as every web api controller should have route
     //[ApiController] //If this attribute is commented, then wherever we want to read JsonData from Req.Body we need to write [FromBody] explicitly before. If any model state errors appears, then it automatically redirects to bad request page
+    [ApiVersion("2.0")]
     public class CitiesController : CustomControllerBase
     {
         private readonly ApplicationDbContext _db;
