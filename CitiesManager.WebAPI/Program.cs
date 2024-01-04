@@ -19,7 +19,8 @@ builder.Services.AddApiVersioning(
     config =>
     {
         //config.ApiVersionReader = new UrlSegmentApiVersionReader(); //to identify current working version of api from request url (mentioned in CustomController Route as route parameter)
-        config.ApiVersionReader = new QueryStringApiVersionReader(); //to identify current working version of api from query string 'api-version' (mentioned in CustomController)
+        //config.ApiVersionReader = new QueryStringApiVersionReader(); //to identify current working version of api from query string 'api-version' (mentioned in CustomController)
+        config.ApiVersionReader = new HeaderApiVersionReader("api-version"); //to identify current working version of api from request header 'api-version' (Make get request with key 'api-version' value 1 in postman)
         config.DefaultApiVersion = new ApiVersion(1, 0); //setting default api version to 1.0 if no version is specified in querystring
         config.AssumeDefaultVersionWhenUnspecified = true;
     });
