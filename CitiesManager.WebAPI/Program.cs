@@ -15,7 +15,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(
 
 //add swagger as service
 builder.Services.AddEndpointsApiExplorer(); //enables swagger to read metadata(http methods, url attributes) of endpoints (web api action methods) i.e., generates description of all endpoints
-builder.Services.AddSwaggerGen(); //configure swagger to generate documentation for API's endpoints (openapi specification).
+builder.Services.AddSwaggerGen(
+    options =>
+    {
+        options.IncludeXmlComments(
+            Path.Combine(AppContext.BaseDirectory, "api.xml")
+            );
+    }); //configure swagger to generate documentation for API's endpoints (openapi specification).
 
 var app = builder.Build();
 
