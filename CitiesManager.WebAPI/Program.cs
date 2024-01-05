@@ -80,8 +80,20 @@ builder.Services.AddCors(
             policyBuilder.WithHeaders(
                 "Authorization", "origin", "accept", "content-type"
                 );//List of Request headers allowed in the client side
-
+            
             policyBuilder.WithMethods("GET", "POST", "PUT", "DELETE"); //Request methods to be allowed
+        });
+
+        //Applying custom cors policy which will override the default policy
+        options.AddPolicy("4100Client",policyBuilder =>
+        {
+            policyBuilder.WithOrigins(builder.Configuration.GetSection("AllowedOriginsDummy").Get<string[]>()); //giving permission to url of angular application to read response from our core application
+
+            policyBuilder.WithHeaders(
+                "Authorization", "origin", "accept"
+                );//List of Request headers allowed in the client side
+
+            policyBuilder.WithMethods("GET"); //Request methods to be allowed
         });
     });
 
