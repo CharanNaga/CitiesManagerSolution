@@ -67,11 +67,21 @@ builder.Services.AddVersionedApiExplorer(options =>
     options.SubstituteApiVersionInUrl = true; //when set true then the version number above can be substituted in SwaggerEndPoint options provided
 });
 
+//CORS: localhost:7283
+builder.Services.AddCors(
+    options =>
+    {
+        options.AddDefaultPolicy(policyBuilder =>
+        {
+            //policyBuilder.WithOrigins("http://localhost:4200"); //giving permission to url of angular application to read response from our core application
+            policyBuilder.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()); //giving permission to url of angular application to read response from our core application
+        });
+    });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 app.UseHsts();
-
 app.UseHttpsRedirection();
 
 app.UseSwagger(); //creates endpoint for swagger.json file (openapi specification abt web api controller endpoints)
@@ -82,6 +92,10 @@ app.UseSwaggerUI(options =>
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
     options.SwaggerEndpoint("/swagger/v2/swagger.json", "2.0");
 }); //creates swagger UI for testing all web api controllers / action methods
+
+//to generate response header for each request, use middleware cors
+app.UseRouting();
+app.UseCors(); //allow to send response header 'Access-Control-Allow-Origin' with value of http://localhost:4200
 
 app.UseAuthorization();
 
