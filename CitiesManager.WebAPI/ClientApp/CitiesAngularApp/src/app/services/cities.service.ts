@@ -8,19 +8,6 @@ const API_BASE_URL: string = "https://localhost:7283/api/";
   providedIn: 'root'
 })
 export class CitiesService {
-  //cities: City[] = [];
-  //constructor() {
-  //  this.cities = [
-  //    new City("101", "City-A"),
-  //    new City("102", "City-B"),
-  //    new City("103", "City-C"),
-  //    new City("104", "City-D")
-  //  ];
-  //}
-  //public getCities(): City[] {
-  //  return this.cities;
-  //}
-
   cities: City[] = [];
   constructor(private httpClient: HttpClient) {
 
@@ -36,5 +23,11 @@ export class CitiesService {
     let headers = new HttpHeaders();
     headers = headers.append("Authorization", "Bearer myToken");
     return this.httpClient.post<City>(`${API_BASE_URL}v1/cities`,city, { headers: headers });
+  }
+
+  public putCity(city: City): Observable<string> {
+    let headers = new HttpHeaders();
+    headers = headers.append("Authorization", "Bearer myToken");
+    return this.httpClient.put<string>(`${API_BASE_URL}v1/cities/${city.cityID}`, city, { headers: headers });
   }
 }
