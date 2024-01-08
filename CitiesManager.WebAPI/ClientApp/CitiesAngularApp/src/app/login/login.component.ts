@@ -34,7 +34,7 @@ export class LoginComponent {
       //calling Respective Service
       this.accountService.postLogin(this.loginForm.value)
         .subscribe({
-          next: (response: LoginUser) => {
+          next: (response: any) => {
             //When succeeded, printing response on the log
             console.log(response);
 
@@ -43,6 +43,10 @@ export class LoginComponent {
 
             //storing current working username
             this.accountService.currentUserName = response.email;
+
+            //storing custom data as part of memory
+            localStorage["token"] = response.token;
+
             //Redirecting to cities component
             this.router.navigate(['/cities']);
 
