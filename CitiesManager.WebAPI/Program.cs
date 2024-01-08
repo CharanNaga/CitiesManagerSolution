@@ -1,4 +1,6 @@
 using CitiesManager.Core.Identities;
+using CitiesManager.Core.ServiceContracts;
+using CitiesManager.Core.Services;
 using CitiesManager.Infrastructure.DatabaseContext;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -17,6 +19,9 @@ builder.Services.AddControllers(
         options.Filters.Add(new ConsumesAttribute("application/json")); //making default REQUEST type to application/json
     })
     .AddXmlSerializerFormatters(); //for enabling xml formatter which isn't supported by .net core by default
+
+//adding jwtservice to the Ioc Container
+builder.Services.AddTransient<IJwtService,JwtService>();
 
 //adding api versioning to identify same end points from different versions
 builder.Services.AddApiVersioning(
