@@ -39,7 +39,7 @@ namespace CitiesManager.WebAPI.Controllers.v1
                 PhoneNumber = registerDTO.PhoneNumber
             };
 
-            IdentityResult result = await _userManager.CreateAsync(user);
+            IdentityResult result = await _userManager.CreateAsync(user,registerDTO.Password);
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
