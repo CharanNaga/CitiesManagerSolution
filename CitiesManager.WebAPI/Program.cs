@@ -123,6 +123,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 app.UseHsts();
 app.UseHttpsRedirection();
+app.UseStaticFiles(); //optional
 
 app.UseSwagger(); //creates endpoint for swagger.json file (openapi specification abt web api controller endpoints)
 app.UseSwaggerUI(options =>
