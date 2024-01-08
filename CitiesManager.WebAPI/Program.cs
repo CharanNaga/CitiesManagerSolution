@@ -1,4 +1,7 @@
+using CitiesManager.Core.Identities;
 using CitiesManager.Infrastructure.DatabaseContext;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
@@ -97,6 +100,24 @@ builder.Services.AddCors(
         //});
     });
 
+//adding Identity as a service to IoC container
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>  //for creating users, roles tables
+{
+    options.Password.RequiredLength = 5; //min length of password is 5 chars
+    options.Password.RequireNonAlphanumeric = false; //may or mayn't contain atleast one non alphanumeric value
+    options.Password.RequireUppercase = false; //may or mayn't contain atleast one uppercase letter
+    options.Password.RequireLowercase = true; //must and should contain atleast one lowercase letter
+    options.Password.RequireDigit = true; //Contain atleast one digit
+})
+    .AddEntityFrameworkStores<ApplicationDbContext>()  //creating tables using IdentityDbContext overall in entire application
+    .AddDefaultTokenProviders() //Generating tokens at runtime randomly while Email & phone number verifications, forgot or resetting passwords
+    .AddUserStore<
+        UserStore<ApplicationUser, ApplicationRole, ApplicationDbContext, Guid>
+        >()  //configuring repository layer for users table i.e., users store
+    .AddRoleStore<
+        RoleStore<ApplicationRole, ApplicationDbContext, Guid>
+        >(); //configuring repository layer for roles table i.e., roles store
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -116,7 +137,8 @@ app.UseSwaggerUI(options =>
 app.UseRouting();
 app.UseCors(); //allow to send response header 'Access-Control-Allow-Origin' with value of http://localhost:4200
 
-app.UseAuthorization();
+app.UseAuthentication(); //when we make request to app pipeline, if a user is already logged in (identity cookie already present in browser).. that cookie automatically submitted to server as part of request cookies then this authentication will read that particular cookie & extract user details like UserID & UserName
+app.UseAuthorization(); // Validates access permissions of the user.
 
 app.MapControllers();
 
