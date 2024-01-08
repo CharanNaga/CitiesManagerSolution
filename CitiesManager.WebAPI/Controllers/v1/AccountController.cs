@@ -1,5 +1,6 @@
 ﻿using CitiesManager.Core.DTO;
 using CitiesManager.Core.Identities;
+using CitiesManager.Core.ServiceContracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +15,14 @@ namespace CitiesManager.WebAPI.Controllers.v1
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly IJwtService _jwtService;
 
-        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, RoleManager<ApplicationRole> roleManager,IJwtService jwtService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _jwtService = jwtService;
         }
 
         [HttpPost("register")]
@@ -42,8 +45,13 @@ namespace CitiesManager.WebAPI.Controllers.v1
             IdentityResult result = await _userManager.CreateAsync(user,registerDTO.Password);
             if (result.Succeeded)
             {
+                //sign-in
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                return Ok(user);
+
+                //token generation service
+                var authenticationResponse = _jwtService.CreateJwtToken(user);
+
+                return Ok(authenticationResponse);
             }
             else
             {
@@ -87,7 +95,13 @@ namespace CitiesManager.WebAPI.Controllers.v1
                 {
                     return NoContent();
                 }
-                return Ok(new { personName = user.PersonName, email = user.Email });
+                //sign-in
+                await _signInManager.SignInAsync(user, isPersistent: false);
+
+                //token generation service
+                var authenticationResponse = _jwtService.CreateJwtToken(user);
+
+                return Ok(authenticationResponse);
             }
             else
             {
