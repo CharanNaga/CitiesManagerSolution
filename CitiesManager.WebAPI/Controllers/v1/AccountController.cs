@@ -51,6 +51,15 @@ namespace CitiesManager.WebAPI.Controllers.v1
                 //token generation service
                 var authenticationResponse = _jwtService.CreateJwtToken(user);
 
+                //store the newly generated refresh token from response into the users table
+                user.RefreshToken = authenticationResponse.RefreshToken;
+
+                //store the expiration date time from response into the users table
+                user.RefreshTokenExpirationDateTime = authenticationResponse.RefreshTokenExpirationDateTime;
+
+                //For updating the changes back to the database
+                await _userManager.UpdateAsync(user);
+
                 return Ok(authenticationResponse);
             }
             else
@@ -100,6 +109,15 @@ namespace CitiesManager.WebAPI.Controllers.v1
 
                 //token generation service
                 var authenticationResponse = _jwtService.CreateJwtToken(user);
+
+                //store the newly generated refresh token from response into the users table
+                user.RefreshToken = authenticationResponse.RefreshToken;
+
+                //store the expiration date time from response into the users table
+                user.RefreshTokenExpirationDateTime = authenticationResponse.RefreshTokenExpirationDateTime;
+
+                //For updating the changes back to the database
+                await _userManager.UpdateAsync(user);
 
                 return Ok(authenticationResponse);
             }
