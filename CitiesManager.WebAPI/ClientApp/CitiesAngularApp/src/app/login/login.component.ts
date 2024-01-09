@@ -47,6 +47,8 @@ export class LoginComponent {
             //storing custom data as part of memory
             localStorage["token"] = response.token;
 
+            localStorage["refreshToken"] = response.refreshToken;
+
             //Redirecting to cities component
             this.router.navigate(['/cities']);
 
