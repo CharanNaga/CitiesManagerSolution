@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using System.Security.Claims;
 
 namespace CitiesManager.WebAPI.Controllers.v1
 {
@@ -131,6 +132,46 @@ namespace CitiesManager.WebAPI.Controllers.v1
         {
             await _signInManager.SignOutAsync();
             return NoContent();
+        }
+
+        [HttpPost("generate-new-jwt-token")]
+        public async Task<IActionResult> GenerateNewAccessToken(TokenModel tokenModel)
+        {
+            if(tokenModel == null)
+            {
+                return BadRequest("Invalid Client Request");
+            }
+
+            ClaimsPrincipal? principal = _jwtService.GetPrincipalFromJwtToken(tokenModel.Token);
+            if(principal == null)
+            {
+                return BadRequest("Invalid Jwt Access Token");
+            }
+            //extract payload properties 
+            string? email = principal.FindFirstValue(ClaimTypes.Email);
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            //can't regenerate Jwt token based on refresh token if this condition satisfies
+            if(
+                user == null || 
+                user.RefreshToken != tokenModel.RefreshToken || 
+                user.RefreshTokenExpirationDateTime <= DateTime.Now)
+            {
+                return BadRequest("Invalid refresh token");
+            }
+            var authenticationResponse = _jwtService.CreateJwtToken(user);
+
+            //store the newly generated refresh token from response into the users table
+            user.RefreshToken = authenticationResponse.RefreshToken;
+
+            //store the expiration date time from response into the users table
+            user.RefreshTokenExpirationDateTime = authenticationResponse.RefreshTokenExpirationDateTime;
+
+            //For updating the changes back to the database
+            await _userManager.UpdateAsync(user);
+
+            return Ok(authenticationResponse);
         }
     }
 }
