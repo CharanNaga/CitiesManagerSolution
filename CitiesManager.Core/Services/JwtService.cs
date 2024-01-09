@@ -33,7 +33,8 @@ namespace CitiesManager.Core.Services
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), //Unique Id (JWT Id) for the token i.e., JWT unique ID
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()), //Issued at Date and Time of token generation i.e., Issued at (date and time of token generation)
                 new Claim(ClaimTypes.NameIdentifier, user.Email), //Unique value of the particular user (considering email) i.e., Unique name identifier of the user (Email)
-                new Claim(ClaimTypes.Name, user.PersonName) //Name of the User
+                new Claim(ClaimTypes.Name, user.PersonName), //Name of the User,
+                new Claim(ClaimTypes.Email, user.Email) //Email
             };
 
             //secret key ( Creating a SymmetricSecurityKey object using the key specified in the configuration.)
@@ -73,6 +74,35 @@ namespace CitiesManager.Core.Services
                     Convert.ToInt32(_configuration["RefreshToken:EXPIRATION_MINUTES"])
                     )
             };
+        }
+
+        public ClaimsPrincipal? GetPrincipalFromJwtToken(string? token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateAudience = true,
+                ValidAudience = _configuration["Jwt:Audience"],
+                ValidateIssuer = true,
+                ValidIssuer = _configuration["Jwt:Issuer"],
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(_configuration["Jwt:Key"])
+                    ),
+                ValidateLifetime = false
+            };
+
+            JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
+            ClaimsPrincipal principal = jwtSecurityTokenHandler.ValidateToken(token, tokenValidationParameters,out SecurityToken securityToken);
+
+            if(
+                securityToken is not JwtSecurityToken jwtSecurityToken 
+                || !jwtSecurityToken.Header.Alg.Equals(
+                    SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
+                )
+            {
+                throw new SecurityTokenException("Invalid token");
+            }
+            return principal;
         }
 
         //creates refresh token (base 64 string of random numbers)
